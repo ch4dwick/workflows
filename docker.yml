@@ -1,0 +1,54 @@
+name: Docker Workflow
+on:
+  workflow_call:
+    inputs:
+      DOCKER_REPO:
+        required: true
+        type: string
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
+
+jobs:
+  build-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3
+        # Use only for testing via local
+        # env:
+        #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          images: "${{ inputs.DOCKER_REPO }}"
+          flavor: |
+            latest=false
+          # We need semver for each environment so they can be individually rolled back.
+          # Use case: Anyone can build and deploy but all staging and prod commits/merges SHOULD be tagged.
+          # Once a dev tag is merged, staging and prod tags SHOULD be the same but with the suffix ending
+          # with the environment. e.g. 1.2.3-dev SHOULD have a corresponding 1.2.3-staging and so on.
+          # 1 Get the tag name from the push tag event.
+          # 2 Tag an image as 'dev' if a change was pushed in dev. Always triggered on push.
+          # 3 Tag an image as staging or prod if suffixed accordingly.
+          # 4 Tag an image as stable if semver-tagged with prod.
+          tags: |
+            type=ref,event=tag
+            type=ref,event=branch,value=dev,enable=${{ contains(github.ref, 'refs/heads/dev') }}
+            type=match,pattern=v(\d*.\d*.\d*)-(staging|prod),group=2
+            type=raw,value=stable,enable=${{ endsWith(github.ref, '-prod') }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
