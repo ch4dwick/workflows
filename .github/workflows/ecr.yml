@@ -37,7 +37,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ inputs.ECR_REGISTRY }}
           ECR_REPOSITORY: "${{ inputs.ECR_REPO }}"
-          IMAGE_TAG: ${{ output.generate_tag.tag }}
+          IMAGE_TAG: ${{ outputs.generate_tag.tag }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$steps.vars.outputs.tag .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_
