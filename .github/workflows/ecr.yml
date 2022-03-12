@@ -11,6 +11,9 @@ on:
       AWS_REGION:
         required: true
         type: string
+      TAG:
+        required: true
+        type: string
     secrets:
       AWS_ACCESS_KEY_ID:
         required: true
@@ -37,8 +40,8 @@ jobs:
         env:
           ECR_REGISTRY: ${{ inputs.ECR_REGISTRY }}
           ECR_REPOSITORY: "${{ inputs.ECR_REPO }}"
-          IMAGE_TAG: ${{ outputs.generate_tag.tag }}
+          IMAGE_TAG: ${{ inputs.TAG }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$steps.vars.outputs.tag .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG_
   
