@@ -11,6 +11,10 @@ on:
       AWS_REGION:
         required: true
         type: string
+    secrets:
+      AWS_ACCOUNT_ID:
+        required: false
+        description: Used only if this workflow is used in ECR.
     outputs:
       tag:
         description: The generated tag.
@@ -27,7 +31,7 @@ jobs:
         # env:
         #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          images: "${{ inputs.REGISTRY }}/${{ inputs.REPO_NAME }}"
+          images: "${{ secrets.AWS_ACCOUNT_ID }}${{ inputs.REGISTRY }}/${{ inputs.REPO_NAME }}"
           flavor: |
             latest=false
           # We need semver for each environment so they can be individually rolled back.
