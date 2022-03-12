@@ -19,9 +19,6 @@ on:
         required: true
       AWS_SECRET_ACCESS_KEY:
         required: true
-      AWS_ACCOUNT_ID:
-        required: false
-        description: Used only if this workflow is used in ECR.
 
 jobs:
   build-ecr:
@@ -41,7 +38,7 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         id: build_image
         env:
-          ECR_REGISTRY: "${{ secrets.AWS_ACCOUNT_ID }}${{ inputs.ECR_REGISTRY }}"
+          ECR_REGISTRY: "${{ inputs.ECR_REGISTRY }}"
           ECR_REPOSITORY: "${{ inputs.ECR_REPO }}"
           IMAGE_TAG: ${{ inputs.TAG }}
         run: |
