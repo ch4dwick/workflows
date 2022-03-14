@@ -47,7 +47,7 @@ jobs:
           IMAGE_TAG: ${{ inputs.TAG }}
           SEMVER: ${{ inputs.SEMVER }}
         run: |
-          SUFFIX=awk -F - '{print $NF}'
+          SUFFIX=$(echo $SEMVER | awk -F - '{print $NF}')
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$SEMVER \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:$SUFFIX .
