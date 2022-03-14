@@ -2,9 +2,6 @@ name: AWS ECR Workflow
 on:
   workflow_call:
     inputs:
-      ECR_REGISTRY:
-        required: true
-        type: string
       ECR_REPO:
         required: true
         type: string
@@ -26,7 +23,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-        
+
       - name: Configure AWS credentials
         id: config_creds
         uses: aws-actions/configure-aws-credentials@v1
@@ -42,7 +39,7 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         id: build_image
         env:
-          ECR_REGISTRY: "${{ inputs.ECR_REGISTRY }}"
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: "${{ inputs.ECR_REPO }}"
           IMAGE_TAG: ${{ inputs.TAG }}
         run: |
