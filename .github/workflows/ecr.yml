@@ -11,6 +11,9 @@ on:
       TAG:
         required: true
         type: string
+      SEMVER:
+        required: true
+        type: string
     secrets:
       AWS_ACCESS_KEY_ID:
         required: true
@@ -21,14 +24,6 @@ jobs:
   build-ecr:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        id: checkout
-        uses: actions/checkout@v2
-
-      - name: Latest Tag
-        id: latest_tag
-        run: echo ::set-output name=SEMVER::${GITHUB_REF#refs/*/}
-
       - name: Configure AWS credentials
         id: config_creds
         uses: aws-actions/configure-aws-credentials@v1
@@ -47,8 +42,9 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: "${{ inputs.ECR_REPO }}"
           IMAGE_TAG: ${{ inputs.TAG }}
-          SEMVER: ${{ steps.latest_tag.outputs.SEMVER }}
+          SEMVER: ${{ inputs.SEMVER }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY:$SEMVER .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$SEMVER .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$SEMVER
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$TAG
   
